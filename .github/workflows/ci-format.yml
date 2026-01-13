@@ -1,0 +1,43 @@
+name: CI - Format
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  format:
+    name: Format Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Make format script executable
+        run: chmod +x format.sh
+      - name: Run format script
+        run: ./format.sh
+      - name: Check for formatting changes
+        run: |
+          if ! git diff --exit-code; then
+            echo ""
+            echo "Formatting issues detected!"
+            echo ""
+            echo "The following files need formatting:"
+            git diff --name-only
+            echo ""
+            echo "Please run './format.sh' locally and commit the changes."
+            exit 1
+          else
+            echo "All files are properly formatted!"
+          fi
+      - name: Show diff if formatting needed
+        if: failure()
+        run: |-
+          echo "=== Full diff of formatting changes ==="
+          git diff

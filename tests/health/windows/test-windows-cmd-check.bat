@@ -8,8 +8,9 @@ set TESTS_FAILED=0
 set EXPECTED_OUTPUT=pong
 
 for %%I in ("%~dp0..") do set "TESTS_DIR=%%~fI"
-for %%I in ("!TESTS_DIR!\..") do set "PROJECT_ROOT=%%~fI"
+for %%I in ("!TESTS_DIR!\..\..") do set "PROJECT_ROOT=%%~fI"
 set SCRIPT_PATH=!PROJECT_ROOT!\src\health\windows\windows-cmd-check.bat
+
 
 echo.
 echo ++++++++++++++++++++++++++++++++++++++++++
