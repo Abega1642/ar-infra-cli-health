@@ -1,0 +1,98 @@
+name: CI - Script Health Tests
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test-windows:
+    name: Test Windows Scripts
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Test Windows PowerShell Script
+        shell: pwsh
+        run: |
+          Write-Host "Testing Windows PowerShell health check..."
+          & .\tests\health\windows\test-windows-powershell-check.ps1
+      - name: Test Windows CMD Script
+        shell: cmd
+        run: |
+          echo Testing Windows CMD health check...
+          call tests\health\windows\test-windows-cmd-check.bat
+      - name: Test Windows Bash Script (Git Bash)
+        shell: bash
+        run: |
+          echo "Testing Windows Bash health check..."
+          chmod +x tests/health/windows/test-windows-bash-check.sh
+          ./tests/health/windows/test-windows-bash-check.sh
+  test-linux:
+    name: Test Linux Scripts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Verify non-root execution
+        run: |
+          if [ "$(id -u)" -eq 0 ]; then
+            echo "ERROR: Running as root! This should run as regular user."
+            exit 1
+          fi
+          echo "Running as user: $(whoami) (UID: $(id -u))"
+      - name: Test Linux Bash Script
+        shell: bash
+        run: |
+          echo "Testing Linux Bash health check..."
+          chmod +x tests/health/linux/test-linux-bash-check.sh
+          ./tests/health/linux/test-linux-bash-check.sh
+  test-macos:
+    name: Test macOS Scripts
+    runs-on: macos-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Verify non-root execution
+        run: |
+          if [ "$(id -u)" -eq 0 ]; then
+            echo "ERROR: Running as root! This should run as regular user."
+            exit 1
+          fi
+          echo "Running as user: $(whoami) (UID: $(id -u))"
+      - name: Test macOS Bash Script
+        shell: bash
+        run: |
+          echo "Testing macOS Bash health check..."
+          chmod +x tests/health/darwin/test-darwin-bash-check.sh
+          ./tests/health/darwin/test-darwin-bash-check.sh
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [test-windows, test-linux, test-macos]
+    if: always()
+    permissions:
+      contents: read
+    steps:
+      - name: Check test results
+        run: |-
+          echo "=== Test Results Summary ==="
+          echo "Windows: ${{ needs.test-windows.result }}"
+          echo "Linux: ${{ needs.test-linux.result }}"
+          echo "macOS: ${{ needs.test-macos.result }}"
+
+          if [ "${{ needs.test-windows.result }}" != "success" ] || \
+             [ "${{ needs.test-linux.result }}" != "success" ] || \
+             [ "${{ needs.test-macos.result }}" != "success" ]; then
+            echo "Some tests failed"
+            exit 1
+          fi
+          echo "All tests passed"
