@@ -3,9 +3,9 @@
 # Linux health check script
 
 set -euo pipefail
-IFS=$'\n\t'
 
-readonly SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+SCRIPT_NAME="$(basename "${BASH_SOURCE[0]}")"
+readonly SCRIPT_NAME
 readonly EXPECTED_OUTPUT="pong"
 
 main() {

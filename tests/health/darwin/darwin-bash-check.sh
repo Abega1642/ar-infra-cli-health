@@ -3,10 +3,13 @@
 # Test for macOS health check script
 
 set -euo pipefail
-IFS=$'\n\t'
 
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR
+
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+readonly PROJECT_ROOT
+
 readonly SCRIPT_PATH="${PROJECT_ROOT}/src/health/darwin/darwin-bash-check.sh"
 readonly EXPECTED_OUTPUT="pong"
 
